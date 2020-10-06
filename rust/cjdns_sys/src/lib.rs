@@ -9,16 +9,16 @@ macro_rules! c_main {
         use std::ffi::CString;
         use std::os::raw::c_char;
         use std::os::raw::c_int;
+        
         extern "C" {
             fn $cmain(argc: c_int, argv: *const *mut c_char);
         }
-        fn main() {
+        
+        #[no_mangle]
+        pub extern "C" fn main(argc: c_int, argv: *const *mut c_char) -> c_int {
             cjdns_sys::init_sodium();
-            let c_args = std::env::args()
-                .map(|arg| CString::new(arg).unwrap())
-                .map(|arg| arg.into_raw())
-                .collect::<Vec<*mut c_char>>();
             unsafe { $cmain(c_args.len() as c_int, c_args.as_ptr()) }
+            0
         }
     };
 }
